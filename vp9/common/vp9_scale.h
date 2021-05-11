@@ -11,6 +11,7 @@
 #ifndef VP9_COMMON_VP9_SCALE_H_
 #define VP9_COMMON_VP9_SCALE_H_
 
+#include <stdbool.h>
 #include "vp9/common/vp9_mv.h"
 #include "vpx_dsp/vpx_convolve.h"
 
@@ -27,17 +28,20 @@ struct scale_factors {
   int y_scale_fp;  // vertical fixed point scale factor
   int x_step_q4;
   int y_step_q4;
+  int scale;
 
   int (*scale_value_x)(int val, const struct scale_factors *sf);
   int (*scale_value_y)(int val, const struct scale_factors *sf);
 
   convolve_fn_t predict[2][2][2];  // horiz, vert, avg
+  convolve_fn_t_residual predict_residual[2][2][2];  // horiz, vert, avg //TODO (hyunho): start from here, check whether convolution is implemented correctly
 #if CONFIG_VP9_HIGHBITDEPTH
   highbd_convolve_fn_t highbd_predict[2][2][2];  // horiz, vert, avg
 #endif
 };
 
 MV32 vp9_scale_mv(const MV *mv, int x, int y, const struct scale_factors *sf);
+MV32 vp9_scale_nemo_mv(const MV *mv, int x, int y, const struct scale_factors *sf);
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp9_setup_scale_factors_for_frame(struct scale_factors *sf, int other_w,
@@ -47,6 +51,9 @@ void vp9_setup_scale_factors_for_frame(struct scale_factors *sf, int other_w,
 void vp9_setup_scale_factors_for_frame(struct scale_factors *sf, int other_w,
                                        int other_h, int this_w, int this_h);
 #endif
+
+void vp9_setup_scale_factors_for_sr_frame(struct scale_factors *sf, int other_w,
+                                          int other_h, int this_w, int this_h, bool upsample, bool add, int scale);
 
 static INLINE int vp9_is_valid_scale(const struct scale_factors *sf) {
   return sf->x_scale_fp != REF_INVALID_SCALE &&

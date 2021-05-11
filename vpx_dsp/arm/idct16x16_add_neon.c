@@ -63,6 +63,7 @@ static INLINE void idct_cospi_16_16_d(const int16x4_t s0, const int16x4_t s1,
   wrap_low_4x2(t32, d0, d1);
 }
 
+//hyunho: a0, a1 seems to residual
 static INLINE void idct16x16_add_store(const int16x8_t *const out,
                                        uint8_t *dest, const int stride) {
   // Add the result to dest

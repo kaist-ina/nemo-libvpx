@@ -16,6 +16,7 @@
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/txfm_common.h"
 
+//hyunho: a0, a1 seems to residual
 void vpx_idct4x4_16_add_neon(const tran_low_t *input, uint8_t *dest,
                              int stride) {
   const uint8_t *dst = dest;
@@ -47,10 +48,10 @@ void vpx_idct4x4_16_add_neon(const tran_low_t *input, uint8_t *dest,
   dst += stride;
   dest32_u32 = vld1_lane_u32((const uint32_t *)dst, dest32_u32, 0);
 
-  d01_u16 = vaddw_u8(vreinterpretq_u16_s16(a0), dest01_u8);
+  d01_u16 = vaddw_u8(vreinterpretq_u16_s16(a0), dest01_u8); //hyunho: a0, a1 seems to be residual value
   d32_u16 =
       vaddw_u8(vreinterpretq_u16_s16(a1), vreinterpret_u8_u32(dest32_u32));
-  d01 = vqmovun_s16(vreinterpretq_s16_u16(d01_u16));
+  d01 = vqmovun_s16(vreinterpretq_s16_u16(d01_u16)); //hyunho: this seems to apply clip
   d32 = vqmovun_s16(vreinterpretq_s16_u16(d32_u16));
 
   store_u8(dest, stride, d01);

@@ -45,6 +45,7 @@ const char *vpx_codec_err_to_string(vpx_codec_err_t err) {
     case VPX_CODEC_CORRUPT_FRAME: return "Corrupt frame detected";
     case VPX_CODEC_INVALID_PARAM: return "Invalid parameter";
     case VPX_CODEC_LIST_END: return "End of iterated list";
+    case VPX_NEMO_ERROR: return "Error from NEMO implementation";
   }
 
   return "Unrecognized error code";

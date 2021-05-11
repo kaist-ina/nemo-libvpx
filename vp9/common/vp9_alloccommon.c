@@ -61,20 +61,30 @@ static void free_seg_map(VP9_COMMON *cm) {
   cm->last_frame_seg_map = NULL;
 }
 
-void vp9_free_ref_frame_buffers(BufferPool *pool) {
-  int i;
+void vp9_free_ref_frame_buffers(BufferPool *pool)
+{
+    int i;
 
-  for (i = 0; i < FRAME_BUFFERS; ++i) {
-    if (!pool->frame_bufs[i].released &&
-        pool->frame_bufs[i].raw_frame_buffer.data != NULL) {
-      pool->release_fb_cb(pool->cb_priv, &pool->frame_bufs[i].raw_frame_buffer);
-      pool->frame_bufs[i].ref_count = 0;
-      pool->frame_bufs[i].released = 1;
+    for (i = 0; i < FRAME_BUFFERS; ++i)
+    {
+        if (!pool->frame_bufs[i].released && pool->frame_bufs[i].raw_frame_buffer.data != NULL)
+        {
+            pool->release_fb_cb(pool->cb_priv, &pool->frame_bufs[i].raw_frame_buffer);
+            if (pool->mode == DECODE_CACHE || pool->mode == DECODE_SR)
+            {
+                pool->release_fb_cb(pool->cb_priv, &pool->frame_bufs[i].raw_sr_frame_buffer);
+            }
+            pool->frame_bufs[i].ref_count = 0;
+            pool->frame_bufs[i].released = 1;
+        }
+        vpx_free(pool->frame_bufs[i].mvs);
+        pool->frame_bufs[i].mvs = NULL;
+        vpx_free_frame_buffer(&pool->frame_bufs[i].buf);
+        if (pool->mode == DECODE_CACHE || pool->mode == DECODE_SR)
+        {
+            vpx_free_frame_buffer(&pool->frame_bufs[i].sr_buf);
+        }
     }
-    vpx_free(pool->frame_bufs[i].mvs);
-    pool->frame_bufs[i].mvs = NULL;
-    vpx_free_frame_buffer(&pool->frame_bufs[i].buf);
-  }
 }
 
 void vp9_free_postproc_buffers(VP9_COMMON *cm) {
@@ -167,6 +177,7 @@ void vp9_remove_common(VP9_COMMON *cm) {
 }
 
 void vp9_init_context_buffers(VP9_COMMON *cm) {
+
   cm->setup_mi(cm);
   if (cm->last_frame_seg_map)
     memset(cm->last_frame_seg_map, 0, cm->mi_rows * cm->mi_cols);

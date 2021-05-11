@@ -272,7 +272,7 @@ void vp8_auto_select_speed(VP8_COMP *cpi) {
 
         f = fopen("speed.stt", "a");
         fprintf(f, " %8ld %10ld %10ld %10ld\n",
-                cpi->common.current_video_frame, cpi->Speed, milliseconds_for_compress, cpi->avg_pick_mode_time);
+                cpi->common.video_frame_index, cpi->Speed, milliseconds_for_compress, cpi->avg_pick_mode_time);
         fclose(f);
     }
 

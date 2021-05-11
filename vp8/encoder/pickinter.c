@@ -1102,7 +1102,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
       // Dont' denoise with GOLDEN OR ALTREF is they are old reference
       // frames (greater than MAX_GF_ARF_DENOISE_RANGE frames in past).
       int skip_old_reference = ((this_ref_frame != LAST_FRAME) &&
-                                (cpi->common.current_video_frame -
+                                (cpi->common.video_frame_index -
                                      cpi->current_ref_frames[this_ref_frame] >
                                  MAX_GF_ARF_DENOISE_RANGE))
                                    ? 1

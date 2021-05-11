@@ -20,6 +20,8 @@
 extern "C" {
 #endif
 
+#define MAX_VP9_HEADER_SIZE 80
+
 static INLINE void inter_predictor(const uint8_t *src, int src_stride,
                                    uint8_t *dst, int dst_stride,
                                    const int subpel_x, const int subpel_y,
@@ -29,6 +31,28 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
   sf->predict[subpel_x != 0][subpel_y != 0][ref](src, src_stride, dst,
                                                  dst_stride, kernel, subpel_x,
                                                  xs, subpel_y, ys, w, h);
+}
+
+static INLINE void intra_upsample(const uint8_t *src, int src_stride,
+                                        uint8_t *dst, int dst_stride,
+                                        const int subpel_x, const int subpel_y,
+                                        const struct scale_factors *sf, int w, int h,
+                                        int ref, const InterpKernel *kernel, int x_scale,
+                                        int y_scale) {
+  sf->predict[subpel_x != 0][subpel_y != 0][ref](src, src_stride, dst,
+                                                          dst_stride, kernel, subpel_x,
+                                                          x_scale, subpel_y, y_scale, w, h);
+}
+
+static INLINE void inter_upsample(const int16_t *src, int src_stride,
+                                        uint8_t *dst, int dst_stride,
+                                        const int subpel_x, const int subpel_y,
+                                        const struct scale_factors *sf, int w, int h,
+                                        int ref, const InterpKernel *kernel, int x_scale,
+                                        int y_scale) {
+    sf->predict_residual[subpel_x != 0][subpel_y != 0][ref](src, src_stride, dst,
+                                                   dst_stride, kernel, subpel_x,
+                                                   x_scale, subpel_y, y_scale, w, h);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -91,13 +115,52 @@ static INLINE void setup_pred_plane(struct buf_2d *dst, uint8_t *src,
   dst->stride = stride;
 }
 
+static INLINE void setup_res_plane(struct residual_2d *dst, int16_t *src,
+                                    int stride, int mi_row, int mi_col,
+                                    const struct scale_factors *scale,
+                                    int subsampling_x, int subsampling_y) {
+  const int x = (MI_SIZE * mi_col) >> subsampling_x;
+  const int y = (MI_SIZE * mi_row) >> subsampling_y;
+  dst->buf = src + scaled_buffer_offset(x, y, stride, scale);
+  dst->stride = stride;
+}
+
+void vp9_setup_debug_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
+                            const YV12_BUFFER_CONFIG *src, int mi_row,
+                            int mi_col);
+
 void vp9_setup_dst_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
                           const YV12_BUFFER_CONFIG *src, int mi_row,
                           int mi_col);
 
+
 void vp9_setup_pre_planes(MACROBLOCKD *xd, int idx,
                           const YV12_BUFFER_CONFIG *src, int mi_row, int mi_col,
                           const struct scale_factors *sf);
+
+void vp9_setup_res_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
+                          const YV12_BUFFER_CONFIG *src, int mi_row,
+                          int mi_col);
+
+void vp9_setup_sr_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
+                         const YV12_BUFFER_CONFIG *src, int mi_row,
+                         int mi_col, const struct scale_factors *sf);
+
+void vp9_setup_ref_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
+                          const YV12_BUFFER_CONFIG *src, int mi_row,
+                          int mi_col, const struct scale_factors *sf);
+
+void vp9_setup_compare_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
+                              const YV12_BUFFER_CONFIG *src, int mi_row,
+                              int mi_col, const struct scale_factors *sf);
+
+void vp9_setup_residual_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
+                               const YV12_BUFFER_CONFIG *src, int mi_row,
+                               int mi_col, const struct scale_factors *sf);
+
+void vp9_setup_input_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
+                          const YV12_BUFFER_CONFIG *src, int mi_row,
+                          int mi_col);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -119,7 +119,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
   if (pbi->ec_active) {
     int throw_residual;
-    /* When we have independent partitions we can apply residual even
+    /* When we have independent partitions we can apply lr_resiudal even
      * though other partitions within the frame are corrupt.
      */
     throw_residual =
@@ -158,7 +158,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       short *DQC = xd->dequant_y1;
       int dst_stride = xd->dst.y_stride;
 
-      /* clear out residual eob info */
+      /* clear out lr_resiudal eob info */
       if (xd->mode_info_context->mbmi.mb_skip_coeff) memset(xd->eobs, 0, 25);
 
       intra_prediction_down_copy(xd, xd->recon_above[0] + 16);
@@ -543,8 +543,8 @@ static void decode_mb_rows(VP8D_COMP *pbi) {
            * conceal with an inter block. Interpolate MVs from neighboring
            * MBs.
            *
-           * Note that for the first mb with corrupt residual in a frame,
-           * we might not discover that before decoding the residual. That
+           * Note that for the first mb with corrupt lr_resiudal in a frame,
+           * we might not discover that before decoding the lr_resiudal. That
            * happens after this check, and therefore no inter concealment
            * will be done.
            */

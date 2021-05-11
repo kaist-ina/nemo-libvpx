@@ -2304,7 +2304,7 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
         {
             printf("\n_pick_loop_filter_level:%d\n", cpi->time_pick_lpf / 1000);
             printf("\n_frames recive_data encod_mb_row compress_frame  Total\n");
-            printf("%6d %10ld %10ld %10ld %10ld\n", cpi->common.current_video_frame, cpi->time_receive_data / 1000, cpi->time_encode_mb_row / 1000, cpi->time_compress_data / 1000, (cpi->time_receive_data + cpi->time_compress_data) / 1000);
+            printf("%6d %10ld %10ld %10ld %10ld\n", cpi->common.video_frame_index, cpi->time_receive_data / 1000, cpi->time_encode_mb_row / 1000, cpi->time_compress_data / 1000, (cpi->time_receive_data + cpi->time_compress_data) / 1000);
         }
 #endif
   }
@@ -3407,7 +3407,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
         // If the initial starting value of the buffer level is zero (this can
         // happen because we may have not started encoding this higher stream),
         // then reset it to non-zero value based on |starting_buffer_level|.
-        if (cpi->common.current_video_frame == 0 && cpi->buffer_level == 0) {
+        if (cpi->common.video_frame_index == 0 && cpi->buffer_level == 0) {
           unsigned int i;
           cpi->bits_off_target = cpi->oxcf.starting_buffer_level;
           cpi->buffer_level = cpi->oxcf.starting_buffer_level;
@@ -3417,11 +3417,11 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
             lc->buffer_level = lc->starting_buffer_level;
           }
         }
-        cpi->common.current_video_frame =
+        cpi->common.video_frame_index =
             low_res_frame_info->key_frame_counter_value;
       } else {
         low_res_frame_info->key_frame_counter_value =
-            cpi->common.current_video_frame;
+            cpi->common.video_frame_index;
       }
     }
   }
@@ -4280,7 +4280,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
   /* if there are no coded macroblocks at all drop this frame */
   if (cpi->common.MBs == cpi->mb.skip_true_count &&
       (cpi->drop_frame_count & 7) != 7 && cm->frame_type != KEY_FRAME) {
-    cpi->common.current_video_frame++;
+    cpi->common.video_frame_index++;
     cpi->frames_since_key++;
     cpi->drop_frame_count++;
     // We advance the temporal pattern for dropped frames.
@@ -4432,7 +4432,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 #endif
 
 #ifdef OUTPUT_YUV_SKINMAP
-  if (cpi->common.current_video_frame > 1) {
+  if (cpi->common.video_frame_index > 1) {
     vp8_compute_skin_map(cpi, yuv_skinmap_file);
   }
 #endif
@@ -4644,7 +4644,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
             fprintf(f, "%10d %10d %10d %10d %10d %10"PRId64" %10"PRId64
                        "%10"PRId64" %10d %6d %6d %6d %6d %5d %5d %5d %8d "
                        "%8.2lf %"PRId64" %10.3lf %10"PRId64" %8d\n",
-                       cpi->common.current_video_frame, cpi->this_frame_target,
+                       cpi->common.video_frame_index, cpi->this_frame_target,
                        cpi->projected_frame_size,
                        (cpi->projected_frame_size - cpi->this_frame_target),
                        cpi->total_target_vs_actual,
@@ -4665,7 +4665,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
             fprintf(f, "%10d %10d %10d %10d %10d %10"PRId64" %10"PRId64
                        "%10"PRId64" %10d %6d %6d %6d %6d %5d %5d %5d %8d "
                        "%8.2lf %"PRId64" %10.3lf %8d\n",
-                       cpi->common.current_video_frame, cpi->this_frame_target,
+                       cpi->common.video_frame_index, cpi->this_frame_target,
                        cpi->projected_frame_size,
                        (cpi->projected_frame_size - cpi->this_frame_target),
                        cpi->total_target_vs_actual,
@@ -4687,7 +4687,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
             FILE *fmodes = fopen("Modes.stt", "a");
 
             fprintf(fmodes, "%6d:%1d:%1d:%1d ",
-                        cpi->common.current_video_frame,
+                        cpi->common.video_frame_index,
                         cm->frame_type, cm->refresh_golden_frame,
                         cm->refresh_alt_ref_frame);
 
@@ -5290,7 +5290,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
     if (cpi->pass != 1)
     {
         FILE *f = fopen("skip.stt", "a");
-        fprintf(f, "frame:%4d flags:%4x Q:%4d P:%4d Size:%5d\n", cpi->common.current_video_frame, *frame_flags, cpi->common.base_qindex, cpi->prob_skip_false, *size);
+        fprintf(f, "frame:%4d flags:%4x Q:%4d P:%4d Size:%5d\n", cpi->common.video_frame_index, *frame_flags, cpi->common.base_qindex, cpi->prob_skip_false, *size);
 
         if (cpi->is_src_frame_alt_ref == 1)
             fprintf(f, "skipcount: %4d framesize: %d\n", cpi->skip_true_count , *size);

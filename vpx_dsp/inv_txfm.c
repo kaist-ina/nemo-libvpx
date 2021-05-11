@@ -175,6 +175,31 @@ void vpx_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   }
 }
 
+void vpx_idct4x4_16_copy_add_c(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride) {
+    int i, j;
+    tran_low_t out[4 * 4];
+    tran_low_t *outptr = out;
+    tran_low_t temp_in[4], temp_out[4];
+
+    // Rows
+    for (i = 0; i < 4; ++i) {
+        idct4_c(input, outptr);
+        input += 4;
+        outptr += 4;
+    }
+
+    // Columns
+    for (i = 0; i < 4; ++i) {
+        for (j = 0; j < 4; ++j) temp_in[j] = out[j * 4 + i];
+        idct4_c(temp_in, temp_out);
+        for (j = 0; j < 4; ++j) {
+            dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                                  ROUND_POWER_OF_TWO(temp_out[j], 4));
+            residual[j * res_stride + i] = clip_pixel_int16(ROUND_POWER_OF_TWO(temp_out[j], 4));
+        }
+    }
+}
+
 void vpx_idct4x4_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   int i;
   tran_high_t a1;
@@ -190,6 +215,32 @@ void vpx_idct4x4_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
     dest[2] = clip_pixel_add(dest[2], a1);
     dest[3] = clip_pixel_add(dest[3], a1);
     dest += stride;
+  }
+}
+
+void vpx_idct4x4_1_copy_add_c(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride) {
+  int i;
+  tran_high_t a1;
+  tran_low_t out =
+          WRAPLOW(dct_const_round_shift((int16_t) input[0] * cospi_16_64));
+
+  out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
+  a1 = ROUND_POWER_OF_TWO(out, 4);
+
+  for (i = 0; i < 4; i++) {
+    dest[0] = clip_pixel_add(dest[0], a1);
+    dest[1] = clip_pixel_add(dest[1], a1);
+    dest[2] = clip_pixel_add(dest[2], a1);
+    dest[3] = clip_pixel_add(dest[3], a1);
+
+    dest += stride;
+
+    residual[0] = clip_pixel_int16(a1);
+    residual[1] = clip_pixel_int16(a1);
+    residual[2] = clip_pixel_int16(a1);
+    residual[3] = clip_pixel_int16(a1);
+
+    residual += res_stride;
   }
 }
 
@@ -347,6 +398,31 @@ void vpx_idct8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   }
 }
 
+void vpx_idct8x8_64_copy_add_c(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride) {
+    int i, j;
+    tran_low_t out[8 * 8];
+    tran_low_t *outptr = out;
+    tran_low_t temp_in[8], temp_out[8];
+
+    // First transform rows
+    for (i = 0; i < 8; ++i) {
+        idct8_c(input, outptr);
+        input += 8;
+        outptr += 8;
+    }
+
+    // Then transform columns
+    for (i = 0; i < 8; ++i) {
+        for (j = 0; j < 8; ++j) temp_in[j] = out[j * 8 + i];
+        idct8_c(temp_in, temp_out);
+        for (j = 0; j < 8; ++j) {
+            dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                                  ROUND_POWER_OF_TWO(temp_out[j], 5));
+            residual[j * res_stride + i] =  clip_pixel_int16(ROUND_POWER_OF_TWO(temp_out[j], 5));
+        }
+    }
+}
+
 void vpx_idct8x8_12_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   int i, j;
   tran_low_t out[8 * 8] = { 0 };
@@ -372,6 +448,32 @@ void vpx_idct8x8_12_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   }
 }
 
+void vpx_idct8x8_12_copy_add_c(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride) {
+    int i, j;
+    tran_low_t out[8 * 8] = { 0 };
+    tran_low_t *outptr = out;
+    tran_low_t temp_in[8], temp_out[8];
+
+    // First transform rows
+    // Only first 4 row has non-zero coefs
+    for (i = 0; i < 4; ++i) {
+        idct8_c(input, outptr);
+        input += 8;
+        outptr += 8;
+    }
+
+    // Then transform columns
+    for (i = 0; i < 8; ++i) {
+        for (j = 0; j < 8; ++j) temp_in[j] = out[j * 8 + i];
+        idct8_c(temp_in, temp_out);
+        for (j = 0; j < 8; ++j) {
+            dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                                  ROUND_POWER_OF_TWO(temp_out[j], 5));
+            residual[j * res_stride + i] = clip_pixel_int16(ROUND_POWER_OF_TWO(temp_out[j], 5));
+        }
+    }
+}
+
 void vpx_idct8x8_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   int i, j;
   tran_high_t a1;
@@ -384,6 +486,24 @@ void vpx_idct8x8_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
     for (i = 0; i < 8; ++i) dest[i] = clip_pixel_add(dest[i], a1);
     dest += stride;
   }
+}
+
+void vpx_idct8x8_1_copy_add_c(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride) { //TODO
+    int i, j;
+    tran_high_t a1;
+    tran_low_t out =
+            WRAPLOW(dct_const_round_shift((int16_t)input[0] * cospi_16_64));
+
+    out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
+    a1 = ROUND_POWER_OF_TWO(out, 5);
+    for (j = 0; j < 8; ++j) {
+        for (i = 0; i < 8; ++i) {
+          dest[i] = clip_pixel_add(dest[i], a1);
+          residual[i] = clip_pixel_int16(a1);
+        }
+        dest += stride;
+        residual += res_stride;
+    }
 }
 
 void iadst16_c(const tran_low_t *input, tran_low_t *output) {
@@ -744,6 +864,32 @@ void vpx_idct16x16_256_add_c(const tran_low_t *input, uint8_t *dest,
   }
 }
 
+void vpx_idct16x16_256_copy_add_c(const tran_low_t *input, uint8_t *dest,
+                             int stride, int16_t *residual, int res_stride) {
+    int i, j;
+    tran_low_t out[16 * 16];
+    tran_low_t *outptr = out;
+    tran_low_t temp_in[16], temp_out[16];
+
+    // First transform rows
+    for (i = 0; i < 16; ++i) {
+        idct16_c(input, outptr);
+        input += 16;
+        outptr += 16;
+    }
+
+    // Then transform columns
+    for (i = 0; i < 16; ++i) {
+        for (j = 0; j < 16; ++j) temp_in[j] = out[j * 16 + i];
+        idct16_c(temp_in, temp_out);
+        for (j = 0; j < 16; ++j) {
+            dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                                  ROUND_POWER_OF_TWO(temp_out[j], 6));
+            residual[j * res_stride + i] = clip_pixel_int16(ROUND_POWER_OF_TWO(temp_out[j], 6));
+        }
+    }
+}
+
 void vpx_idct16x16_38_add_c(const tran_low_t *input, uint8_t *dest,
                             int stride) {
   int i, j;
@@ -768,6 +914,33 @@ void vpx_idct16x16_38_add_c(const tran_low_t *input, uint8_t *dest,
                                             ROUND_POWER_OF_TWO(temp_out[j], 6));
     }
   }
+}
+
+void vpx_idct16x16_38_copy_add_c(const tran_low_t *input, uint8_t *dest,
+                            int stride, int16_t *residual, int res_stride) {
+    int i, j;
+    tran_low_t out[16 * 16] = { 0 };
+    tran_low_t *outptr = out;
+    tran_low_t temp_in[16], temp_out[16];
+
+    // First transform rows. Since all non-zero dct coefficients are in
+    // upper-left 8x8 area, we only need to calculate first 8 rows here.
+    for (i = 0; i < 8; ++i) {
+        idct16_c(input, outptr);
+        input += 16;
+        outptr += 16;
+    }
+
+    // Then transform columns
+    for (i = 0; i < 16; ++i) {
+        for (j = 0; j < 16; ++j) temp_in[j] = out[j * 16 + i];
+        idct16_c(temp_in, temp_out);
+        for (j = 0; j < 16; ++j) {
+            dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                                  ROUND_POWER_OF_TWO(temp_out[j], 6));
+            residual[j * res_stride + i] = clip_pixel_int16(ROUND_POWER_OF_TWO(temp_out[j], 6));
+        }
+    }
 }
 
 void vpx_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest,
@@ -796,6 +969,33 @@ void vpx_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest,
   }
 }
 
+void vpx_idct16x16_10_copy_add_c(const tran_low_t *input, uint8_t *dest,
+                            int stride, int16_t *residual, int res_stride) {
+    int i, j;
+    tran_low_t out[16 * 16] = { 0 };
+    tran_low_t *outptr = out;
+    tran_low_t temp_in[16], temp_out[16];
+
+    // First transform rows. Since all non-zero dct coefficients are in
+    // upper-left 4x4 area, we only need to calculate first 4 rows here.
+    for (i = 0; i < 4; ++i) {
+        idct16_c(input, outptr);
+        input += 16;
+        outptr += 16;
+    }
+
+    // Then transform columns
+    for (i = 0; i < 16; ++i) {
+        for (j = 0; j < 16; ++j) temp_in[j] = out[j * 16 + i];
+        idct16_c(temp_in, temp_out);
+        for (j = 0; j < 16; ++j) {
+            dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                                  ROUND_POWER_OF_TWO(temp_out[j], 6));
+            residual[j * res_stride + i] = clip_pixel_int16(ROUND_POWER_OF_TWO(temp_out[j], 6));
+        }
+    }
+}
+
 void vpx_idct16x16_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   int i, j;
   tran_high_t a1;
@@ -808,6 +1008,24 @@ void vpx_idct16x16_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
     for (i = 0; i < 16; ++i) dest[i] = clip_pixel_add(dest[i], a1);
     dest += stride;
   }
+}
+
+void vpx_idct16x16_1_copy_add_c(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride) {
+    int i, j;
+    tran_high_t a1;
+    tran_low_t out =
+            WRAPLOW(dct_const_round_shift((int16_t)input[0] * cospi_16_64));
+
+    out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
+    a1 = ROUND_POWER_OF_TWO(out, 6);
+    for (j = 0; j < 16; ++j) {
+        for (i = 0; i < 16; ++i) {
+          dest[i] = clip_pixel_add(dest[i], a1);
+          residual[i] = clip_pixel_int16(a1);
+        }
+        dest += stride;
+        residual += res_stride;
+    }
 }
 
 void idct32_c(const tran_low_t *input, tran_low_t *output) {
@@ -1208,6 +1426,38 @@ void vpx_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
   }
 }
 
+void vpx_idct32x32_1024_copy_add_c(const tran_low_t *input, uint8_t *dest,
+                              int stride, int16_t *residual, int res_stride) {
+    int i, j;
+    tran_low_t out[32 * 32];
+    tran_low_t *outptr = out;
+    tran_low_t temp_in[32], temp_out[32];
+
+    // Rows
+    for (i = 0; i < 32; ++i) {
+        int16_t zero_coeff = 0;
+        for (j = 0; j < 32; ++j) zero_coeff |= input[j];
+
+        if (zero_coeff)
+            idct32_c(input, outptr);
+        else
+            memset(outptr, 0, sizeof(tran_low_t) * 32);
+        input += 32;
+        outptr += 32;
+    }
+
+    // Columns
+    for (i = 0; i < 32; ++i) {
+        for (j = 0; j < 32; ++j) temp_in[j] = out[j * 32 + i];
+        idct32_c(temp_in, temp_out);
+        for (j = 0; j < 32; ++j) {
+            dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                                  ROUND_POWER_OF_TWO(temp_out[j], 6));
+            residual[j * res_stride + i] = clip_pixel_int16(ROUND_POWER_OF_TWO(temp_out[j], 6));
+        }
+    }
+}
+
 void vpx_idct32x32_135_add_c(const tran_low_t *input, uint8_t *dest,
                              int stride) {
   int i, j;
@@ -1232,6 +1482,33 @@ void vpx_idct32x32_135_add_c(const tran_low_t *input, uint8_t *dest,
                                             ROUND_POWER_OF_TWO(temp_out[j], 6));
     }
   }
+}
+
+void vpx_idct32x32_135_copy_add_c(const tran_low_t *input, uint8_t *dest,
+                             int stride, int16_t *residual, int res_stride) {
+    int i, j;
+    tran_low_t out[32 * 32] = { 0 };
+    tran_low_t *outptr = out;
+    tran_low_t temp_in[32], temp_out[32];
+
+    // Rows
+    // Only upper-left 16x16 has non-zero coeff
+    for (i = 0; i < 16; ++i) {
+        idct32_c(input, outptr);
+        input += 32;
+        outptr += 32;
+    }
+
+    // Columns
+    for (i = 0; i < 32; ++i) {
+        for (j = 0; j < 32; ++j) temp_in[j] = out[j * 32 + i];
+        idct32_c(temp_in, temp_out);
+        for (j = 0; j < 32; ++j) {
+            dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                                  ROUND_POWER_OF_TWO(temp_out[j], 6));
+            residual[j * res_stride + i] = clip_pixel_int16(ROUND_POWER_OF_TWO(temp_out[j], 6));
+        }
+    }
 }
 
 void vpx_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest,
@@ -1260,6 +1537,33 @@ void vpx_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest,
   }
 }
 
+void vpx_idct32x32_34_copy_add_c(const tran_low_t *input, uint8_t *dest,
+                            int stride, int16_t *residual, int res_stride) {
+    int i, j;
+    tran_low_t out[32 * 32] = { 0 };
+    tran_low_t *outptr = out;
+    tran_low_t temp_in[32], temp_out[32];
+
+    // Rows
+    // Only upper-left 8x8 has non-zero coeff
+    for (i = 0; i < 8; ++i) {
+        idct32_c(input, outptr);
+        input += 32;
+        outptr += 32;
+    }
+
+    // Columns
+    for (i = 0; i < 32; ++i) {
+        for (j = 0; j < 32; ++j) temp_in[j] = out[j * 32 + i];
+        idct32_c(temp_in, temp_out);
+        for (j = 0; j < 32; ++j) {
+            dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                                  ROUND_POWER_OF_TWO(temp_out[j], 6));
+            residual[j * res_stride + i] = clip_pixel_int16(ROUND_POWER_OF_TWO(temp_out[j], 6));
+        }
+    }
+}
+
 void vpx_idct32x32_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   int i, j;
   tran_high_t a1;
@@ -1273,6 +1577,25 @@ void vpx_idct32x32_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
     for (i = 0; i < 32; ++i) dest[i] = clip_pixel_add(dest[i], a1);
     dest += stride;
   }
+}
+
+void vpx_idct32x32_1_copy_add_c(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride) {
+    int i, j;
+    tran_high_t a1;
+    tran_low_t out =
+            WRAPLOW(dct_const_round_shift((int16_t)input[0] * cospi_16_64));
+
+    out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
+    a1 = ROUND_POWER_OF_TWO(out, 6);
+
+    for (j = 0; j < 32; ++j) {
+        for (i = 0; i < 32; ++i) {
+          dest[i] = clip_pixel_add(dest[i], a1);
+          residual[i] = clip_pixel_int16(a1);
+        }
+        dest += stride;
+        residual += res_stride;
+    }
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH

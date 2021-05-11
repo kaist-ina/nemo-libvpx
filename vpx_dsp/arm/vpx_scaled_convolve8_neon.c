@@ -19,6 +19,8 @@
 #include "vpx_dsp/arm/vpx_convolve8_neon.h"
 #include "vpx_ports/mem.h"
 
+#include <stdlib.h>
+
 static INLINE void scaledconvolve_horiz_w4(
     const uint8_t *src, const ptrdiff_t src_stride, uint8_t *dst,
     const ptrdiff_t dst_stride, const InterpKernel *const x_filters,
@@ -94,6 +96,9 @@ static INLINE void scaledconvolve_horiz_w4(
   } while (y > 0);
 }
 
+//    scaledconvolve_horiz_w8(src - src_stride * (SUBPEL_TAPS / 2 - 1),
+//                            src_stride, temp, 64, filter, x0_q4, x_step_q4, w,
+//                            intermediate_height);
 static INLINE void scaledconvolve_horiz_w8(
     const uint8_t *src, const ptrdiff_t src_stride, uint8_t *dst,
     const ptrdiff_t dst_stride, const InterpKernel *const x_filters,
@@ -272,6 +277,7 @@ static INLINE void scaledconvolve_vert_w16(
   } while (--y);
 }
 
+/*
 void vpx_scaled_2d_neon(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
                         ptrdiff_t dst_stride, const InterpKernel *filter,
                         int x0_q4, int x_step_q4, int y0_q4, int y_step_q4,
@@ -292,33 +298,87 @@ void vpx_scaled_2d_neon(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
   // When calling in frame scaling function, the smallest scaling factor is x1/4
   // ==> y_step_q4 = 64. Since w and h are at most 16, the temp buffer is still
   // big enough.
-  DECLARE_ALIGNED(16, uint8_t, temp[(135 + 8) * 64]);
+  DECLARE_ALIGNED(16, uint8_t, temp[10000 * 256]);
+
   const int intermediate_height =
       (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
 
-  assert(w <= 64);
-  assert(h <= 64);
+  //assert(w <= 64);
+  //assert(h <= 64);
   assert(y_step_q4 <= 32 || (y_step_q4 <= 64 && h <= 32));
   assert(x_step_q4 <= 64);
 
   if (w >= 8) {
     scaledconvolve_horiz_w8(src - src_stride * (SUBPEL_TAPS / 2 - 1),
-                            src_stride, temp, 64, filter, x0_q4, x_step_q4, w,
+                            src_stride, temp, 256, filter, x0_q4, x_step_q4, w,
                             intermediate_height);
   } else {
     scaledconvolve_horiz_w4(src - src_stride * (SUBPEL_TAPS / 2 - 1),
-                            src_stride, temp, 64, filter, x0_q4, x_step_q4, w,
+                            src_stride, temp, 256, filter, x0_q4, x_step_q4, w,
                             intermediate_height);
   }
 
   if (w >= 16) {
-    scaledconvolve_vert_w16(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst,
+    scaledconvolve_vert_w16(temp + 256 * (SUBPEL_TAPS / 2 - 1), 256, dst,
                             dst_stride, filter, y0_q4, y_step_q4, w, h);
   } else if (w == 8) {
-    scaledconvolve_vert_w8(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst,
+    scaledconvolve_vert_w8(temp + 256 * (SUBPEL_TAPS / 2 - 1), 256, dst,
                            dst_stride, filter, y0_q4, y_step_q4, w, h);
   } else {
-    scaledconvolve_vert_w4(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst,
+    scaledconvolve_vert_w4(temp + 256 * (SUBPEL_TAPS / 2 - 1), 256, dst,
                            dst_stride, filter, y0_q4, y_step_q4, w, h);
   }
+}
+*/
+
+void vpx_scaled_2d_neon(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
+                        ptrdiff_t dst_stride, const InterpKernel *filter,
+                        int x0_q4, int x_step_q4, int y0_q4, int y_step_q4,
+                        int w, int h) {
+    // Note: Fixed size intermediate buffer, temp, places limits on parameters.
+    // 2d filtering proceeds in 2 steps:
+    //   (1) Interpolate horizontally into an intermediate buffer, temp.
+    //   (2) Interpolate temp vertically to derive the sub-pixel result.
+    // Deriving the maximum number of rows in the temp buffer (135):
+    // --Smallest scaling factor is x1/2 ==> y_step_q4 = 32 (Normative).
+    // --Largest block size is 64x64 pixels.
+    // --64 rows in the downscaled frame span a distance of (64 - 1) * 32 in the
+    //   original frame (in 1/16th pixel units).
+    // --Must round-up because block may be located at sub-pixel position.
+    // --Require an additional SUBPEL_TAPS rows for the 8-tap filter tails.
+    // --((64 - 1) * 32 + 15) >> 4 + 8 = 135.
+    // --Require an additional 8 rows for the horiz_w8 transpose tail.
+    // When calling in frame scaling function, the smallest scaling factor is x1/4
+    // ==> y_step_q4 = 64. Since w and h are at most 16, the temp buffer is still
+    // big enough.
+    DECLARE_ALIGNED(16, uint8_t, temp[(135 + 8) * 64]);
+
+    const int intermediate_height =
+            (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
+
+    assert(w <= 64);
+    assert(h <= 64);
+    assert(y_step_q4 <= 32 || (y_step_q4 <= 64 && h <= 32));
+    assert(x_step_q4 <= 64);
+
+    if (w >= 8) {
+        scaledconvolve_horiz_w8(src - src_stride * (SUBPEL_TAPS / 2 - 1),
+                                src_stride, temp, 64, filter, x0_q4, x_step_q4, w,
+                                intermediate_height);
+    } else {
+        scaledconvolve_horiz_w4(src - src_stride * (SUBPEL_TAPS / 2 - 1),
+                                src_stride, temp, 64, filter, x0_q4, x_step_q4, w,
+                                intermediate_height);
+    }
+
+    if (w >= 16) {
+        scaledconvolve_vert_w16(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst,
+                                dst_stride, filter, y0_q4, y_step_q4, w, h);
+    } else if (w == 8) {
+        scaledconvolve_vert_w8(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst,
+                               dst_stride, filter, y0_q4, y_step_q4, w, h);
+    } else {
+        scaledconvolve_vert_w4(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst,
+                               dst_stride, filter, y0_q4, y_step_q4, w, h);
+    }
 }

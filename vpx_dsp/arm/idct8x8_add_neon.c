@@ -17,6 +17,7 @@
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/txfm_common.h"
 
+//hyunho: a0, a1, ... seems to residual
 static INLINE void add8x8(int16x8_t a0, int16x8_t a1, int16x8_t a2,
                           int16x8_t a3, int16x8_t a4, int16x8_t a5,
                           int16x8_t a6, int16x8_t a7, uint8_t *dest,

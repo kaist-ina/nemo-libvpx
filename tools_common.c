@@ -56,7 +56,8 @@ FILE *set_binary_mode(FILE *stream) {
 
 void die(const char *fmt, ...) {
   LOG_ERROR(NULL);
-  usage_exit();
+  //usage_exit();
+  exit(EXIT_FAILURE);
 }
 
 void fatal(const char *fmt, ...) {

@@ -1,0 +1,65 @@
+//
+// Created by hyunho on 6/30/20.
+//
+
+#ifndef LIBVPX_WRAPPER_VPX_CONVERT_H
+#define LIBVPX_WRAPPER_VPX_CONVERT_H
+
+
+#define BUFFER_UNIT_LEN 1000
+#define CONVERT_FRACTION_BIT 8
+#define CONVERT_FRACTION_SCALE (1 << CONVERT_FRACTION_BIT)
+#define CONVERT_DELTA (1 << (CONVERT_FRACTION_BIT - 1))
+
+/* bt.709 matrix coefficients: RGB to YUV */
+#define RY_COEFF_FLOAT 0.183
+#define GY_COEFF_FLOAT 0.614
+#define BY_COEFF_FLOAT 0.062
+#define RU_COEFF_FLOAT 0.101
+#define GU_COEFF_FLOAT 0.339
+#define BU_COEFF_FLOAT 0.439
+#define RV_COEFF_FLOAT 0.439
+#define GV_COEFF_FLOAT 0.399
+#define BV_COEFF_FLOAT 0.040
+
+static const int RY_COEFF_INT = (int) (RY_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int GY_COEFF_INT = (int) (GY_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int BY_COEFF_INT = (int) (BY_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int RU_COEFF_INT = (int) (RU_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int GU_COEFF_INT = (int) (GU_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int BU_COEFF_INT = (int) (BU_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int RV_COEFF_INT = (int) (RV_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int GV_COEFF_INT = (int) (GV_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int BV_COEFF_INT = (int) (BV_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+
+#define Y_OFFSET 16
+#define U_OFFSET 128
+#define V_OFFSET 128
+
+/* bt.709 matrix coefficients: YUV to RGB */
+#define YR_COEFF_FLOAT 1.164
+#define UR_COEFF_FLOAT 0
+#define VR_COEFF_FLOAT 1.793
+#define YG_COEFF_FLOAT 1.164
+#define UG_COEFF_FLOAT 0.213
+#define VG_COEFF_FLOAT 0.533
+#define YB_COEFF_FLOAT 1.164
+#define UB_COEFF_FLOAT 2.112
+#define VB_COEFF_FLOAT 0
+
+static const int YR_COEFF_INT = (int) (YR_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int UR_COEFF_INT = (int) (UR_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int VR_COEFF_INT = (int) (VR_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int YG_COEFF_INT = (int) (YG_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int UG_COEFF_INT = (int) (UG_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int VG_COEFF_INT = (int) (VG_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int YB_COEFF_INT = (int) (YB_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int UB_COEFF_INT = (int) (UB_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+static const int VB_COEFF_INT = (int) (VB_COEFF_FLOAT * CONVERT_FRACTION_SCALE + 0.5);
+
+//TODO
+#define R_OFFSET 248
+#define G_OFFSET 77
+#define B_OFFSET 289
+
+#endif //LIBVPX_WRAPPER_VPX_CONVERT_H

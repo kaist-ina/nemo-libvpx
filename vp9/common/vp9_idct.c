@@ -124,6 +124,15 @@ void vp9_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
     vpx_idct4x4_1_add(input, dest, stride);
 }
 
+void vp9_idct4x4_copy_add(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride,
+                          int eob) {
+  if (eob > 1)
+      vpx_idct4x4_16_copy_add(input, dest, stride, residual, res_stride);
+  else
+      vpx_idct4x4_1_copy_add(input, dest, stride, residual, res_stride);
+
+}
+
 void vp9_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob) {
   if (eob > 1)
@@ -148,6 +157,22 @@ void vp9_idct8x8_add(const tran_low_t *input, uint8_t *dest, int stride,
     vpx_idct8x8_64_add(input, dest, stride);
 }
 
+void vp9_idct8x8_copy_add(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride,
+                     int eob) {
+  // If dc is 1, then input[0] is the reconstructed value, do not need
+  // dequantization. Also, when dc is 1, dc is counted in eobs, namely eobs >=1.
+
+  // The calculation can be simplified if there are not many non-zero dct
+  // coefficients. Use eobs to decide what to do.
+  if (eob == 1)
+    // DC only DCT coefficient
+    vpx_idct8x8_1_copy_add(input, dest, stride, residual, res_stride);
+  else if (eob <= 12)
+    vpx_idct8x8_12_copy_add(input, dest, stride, residual, res_stride);
+  else
+    vpx_idct8x8_64_copy_add(input, dest, stride, residual, res_stride);
+}
+
 void vp9_idct16x16_add(const tran_low_t *input, uint8_t *dest, int stride,
                        int eob) {
   /* The calculation can be simplified if there are not many non-zero dct
@@ -162,6 +187,20 @@ void vp9_idct16x16_add(const tran_low_t *input, uint8_t *dest, int stride,
     vpx_idct16x16_256_add(input, dest, stride);
 }
 
+void vp9_idct16x16_copy_add(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride,
+                       int eob) {
+  /* The calculation can be simplified if there are not many non-zero dct
+   * coefficients. Use eobs to separate different cases. */
+  if (eob == 1) /* DC only DCT coefficient. */
+    vpx_idct16x16_1_copy_add(input, dest, stride, residual, res_stride);
+  else if (eob <= 10)
+    vpx_idct16x16_10_copy_add(input, dest, stride, residual, res_stride);
+  else if (eob <= 38)
+    vpx_idct16x16_38_copy_add(input, dest, stride, residual, res_stride);
+  else
+    vpx_idct16x16_256_copy_add(input, dest, stride, residual, res_stride);
+}
+
 void vp9_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
                        int eob) {
   if (eob == 1)
@@ -174,6 +213,20 @@ void vp9_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
     vpx_idct32x32_135_add(input, dest, stride);
   else
     vpx_idct32x32_1024_add(input, dest, stride);
+}
+
+void vp9_idct32x32_copy_add(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride,
+                       int eob) {
+  if (eob == 1)
+    vpx_idct32x32_1_copy_add(input, dest, stride, residual, res_stride);
+  else if (eob <= 34)
+    // non-zero coeff only in upper-left 8x8
+    vpx_idct32x32_34_copy_add(input, dest, stride, residual, res_stride);
+  else if (eob <= 135)
+    // non-zero coeff only in upper-left 16x16
+    vpx_idct32x32_135_copy_add(input, dest, stride, residual, res_stride);
+  else
+    vpx_idct32x32_1024_copy_add(input, dest, stride, residual, res_stride);
 }
 
 // iht

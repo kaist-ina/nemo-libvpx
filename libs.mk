@@ -8,6 +8,52 @@
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
 
+LIBYUV_SRCS +=  third_party/libyuv/include/libyuv/basic_types.h  \
+                third_party/libyuv/include/libyuv/convert.h \
+                third_party/libyuv/include/libyuv/convert_argb.h \
+                third_party/libyuv/include/libyuv/convert_from.h \
+                third_party/libyuv/include/libyuv/cpu_id.h  \
+                third_party/libyuv/include/libyuv/planar_functions.h  \
+                third_party/libyuv/include/libyuv/rotate.h  \
+                third_party/libyuv/include/libyuv/rotate_argb.h  \
+                third_party/libyuv/include/libyuv/rotate_row.h  \
+                third_party/libyuv/include/libyuv/row.h  \
+                third_party/libyuv/include/libyuv/scale.h  \
+                third_party/libyuv/include/libyuv/scale_row.h  \
+                third_party/libyuv/include/libyuv/video_common.h \
+                third_party/libyuv/source/convert_argb.cc \
+                third_party/libyuv/source/convert_from_argb.cc \
+                third_party/libyuv/source/convert_from.cc \
+                third_party/libyuv/source/convert_to_argb.cc \
+                third_party/libyuv/source/convert_to_i420.cc \
+                third_party/libyuv/source/convert.cc \
+                third_party/libyuv/source/cpu_id.cc \
+                third_party/libyuv/source/planar_functions.cc \
+                third_party/libyuv/source/row_any.cc \
+                third_party/libyuv/source/row_common.cc \
+                third_party/libyuv/source/row_gcc.cc \
+                third_party/libyuv/source/row_mips.cc \
+                third_party/libyuv/source/row_neon.cc \
+                third_party/libyuv/source/row_neon64.cc \
+                third_party/libyuv/source/row_win.cc \
+				third_party/libyuv/source/rotate.cc \
+				third_party/libyuv/source/rotate_any.cc \
+				third_party/libyuv/source/rotate_argb.cc \
+				third_party/libyuv/source/rotate_common.cc \
+				third_party/libyuv/source/rotate_mips.cc \
+				third_party/libyuv/source/rotate_gcc.cc \
+				third_party/libyuv/source/rotate_neon.cc \
+				third_party/libyuv/source/rotate_neon64.cc \
+				third_party/libyuv/source/rotate_win.cc \
+                third_party/libyuv/source/scale.cc \
+                third_party/libyuv/source/scale_any.cc \
+                third_party/libyuv/source/scale_common.cc \
+                third_party/libyuv/source/scale_gcc.cc \
+                third_party/libyuv/source/scale_mips.cc \
+                third_party/libyuv/source/scale_neon.cc \
+                third_party/libyuv/source/scale_neon64.cc \
+                third_party/libyuv/source/scale_win.cc \
+                third_party/libyuv/source/video_common.cc
 
 # ARM assembly files are written in RVCT-style. We use some make magic to
 # filter those files to allow GCC compilation
@@ -112,6 +158,12 @@ endif
 ifeq ($(CONFIG_DECODERS),yes)
   CODEC_DOC_SECTIONS += decoder
 endif
+
+# Include libyuv for color space converstion & scaling
+CODEC_SRCS-$(CONFIG_LIBYUV) += $(LIBYUV_SRCS)
+INC_PATH-$(CONFIG_LIBYUV) += $(SRC_PATH_BARE)/third_party/libyuv/include
+INC_PATH := $(call enabled,INC_PATH)
+INTERNAL_CFLAGS = $(addprefix -I,$(INC_PATH))
 
 # Suppress -Wextra warnings in third party code.
 $(BUILD_PFX)third_party/googletest/%.cc.o: CXXFLAGS += -Wno-missing-field-initializers

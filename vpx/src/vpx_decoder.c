@@ -186,3 +186,27 @@ vpx_codec_err_t vpx_codec_set_frame_buffer_functions(
 
   return SAVE_STATUS(ctx, res);
 }
+
+vpx_codec_err_t vpx_load_nemo_cfg(vpx_codec_ctx_t *ctx, nemo_cfg_t *nemo_cfg){
+    vpx_codec_err_t res;
+
+    res = ctx->iface->nemo.load_cfg(get_alg_priv(ctx), nemo_cfg);
+
+    return SAVE_STATUS(ctx, res);
+}
+
+vpx_codec_err_t vpx_load_nemo_dnn(vpx_codec_ctx_t *ctx, int scale, const char *dnn_path){
+  vpx_codec_err_t res;
+
+  res = ctx->iface->nemo.load_dnn(get_alg_priv(ctx), scale, dnn_path);
+
+  return SAVE_STATUS(ctx, res);
+}
+
+vpx_codec_err_t vpx_load_nemo_cache_profile(vpx_codec_ctx_t *ctx, int scale, const char *cache_profile_path){
+  vpx_codec_err_t res;
+
+  res = ctx->iface->nemo.load_cache_profile(get_alg_priv(ctx), scale, cache_profile_path);
+
+  return SAVE_STATUS(ctx, res);
+}

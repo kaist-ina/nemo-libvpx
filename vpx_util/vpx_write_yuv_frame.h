@@ -18,6 +18,8 @@
 extern "C" {
 #endif
 
+int vpx_write_y_frame(char *y_file, YV12_BUFFER_CONFIG *s);
+
 void vpx_write_yuv_frame(FILE *yuv_file, YV12_BUFFER_CONFIG *s);
 
 #ifdef __cplusplus

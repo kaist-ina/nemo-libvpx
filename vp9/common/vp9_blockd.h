@@ -113,6 +113,11 @@ struct buf_2d {
   int stride;
 };
 
+struct residual_2d{
+    int16_t *buf;
+    int stride;
+};
+
 struct macroblockd_plane {
   tran_low_t *dqcoeff;
   int subsampling_x;
@@ -122,6 +127,15 @@ struct macroblockd_plane {
   ENTROPY_CONTEXT *above_context;
   ENTROPY_CONTEXT *left_context;
   int16_t seg_dequant[MAX_SEGMENTS][2];
+
+  /* NEMO: new variables */
+    struct buf_2d sr; //used for generating super-resolutioned cached frame
+    struct buf_2d residual; //used for resizing lr_resiudal frame
+    struct buf_2d input;
+    struct buf_2d compare;
+    struct buf_2d reference;
+    struct buf_2d debug;
+    struct residual_2d res;
 
   // number of 4x4s in current block
   uint16_t n4_w, n4_h;
@@ -139,7 +153,9 @@ typedef struct RefBuffer {
   // is used in vp9_onyxd_if.c
   int idx;
   YV12_BUFFER_CONFIG *buf;
+  YV12_BUFFER_CONFIG *buf_sr; //hyunho: used for intra-prediction blocks
   struct scale_factors sf;
+  struct scale_factors sf_sr;
 } RefBuffer;
 
 typedef struct macroblockd {
@@ -193,7 +209,7 @@ typedef struct macroblockd {
   int corrupted;
 
   struct vpx_internal_error_info *error_info;
-} MACROBLOCKD;
+} MACROBLOCKD; //Hyunho: a) contain frame-wise info for decoding / b) plane corresponds to a block processed in decode_block() / c) refer a current frame saved in frame_buffer (VP9COMMON)
 
 static INLINE PLANE_TYPE get_plane_type(int plane) {
   return (PLANE_TYPE)(plane > 0);

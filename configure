@@ -63,6 +63,7 @@ Advanced options:
                                   enable vp9 temporal denoising
   ${toggle_webm_io}               enable input from and output to WebM container
   ${toggle_libyuv}                enable libyuv
+  ${toggle_snpe}                enable snpe for DNN SDK 
 
 Codecs:
   Codecs can be selectively enabled or disabled individually, or by family:
@@ -332,6 +333,8 @@ CONFIG_LIST="
     size_limit
     always_adjust_bpm
     ${EXPERIMENT_LIST}
+    
+    snpe
 "
 CMDLINE_SELECT="
     dependency_tracking
@@ -391,6 +394,8 @@ CMDLINE_SELECT="
     vp9_highbitdepth
     experimental
     always_adjust_bpm
+
+    snpe
 "
 
 process_cmdline() {

@@ -11,6 +11,7 @@
 #ifndef VPX_DSP_VPX_DSP_COMMON_H_
 #define VPX_DSP_VPX_DSP_COMMON_H_
 
+#include <assert.h>
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
@@ -47,6 +48,10 @@ typedef int16_t tran_coef_t;
 
 static INLINE uint8_t clip_pixel(int val) {
   return (val > 255) ? 255 : (val < 0) ? 0 : val;
+}
+
+static INLINE int16_t clip_pixel_int16(int32_t val) {
+  return (val > INT16_MAX) ? INT16_MAX : (val < INT16_MIN) ? INT16_MIN : val;
 }
 
 static INLINE int clamp(int value, int low, int high) {

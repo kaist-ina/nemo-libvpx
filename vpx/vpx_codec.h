@@ -137,8 +137,9 @@ typedef enum {
   /*!\brief An iterator reached the end of list.
    *
    */
-  VPX_CODEC_LIST_END
+  VPX_CODEC_LIST_END,
 
+  VPX_NEMO_ERROR,
 } vpx_codec_err_t;
 
 /*! \brief Codec capabilities bitfield

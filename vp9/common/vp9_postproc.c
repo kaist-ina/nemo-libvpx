@@ -306,6 +306,11 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
     return 0;
   }
 
+  if (cm->nemo_cfg->decode_mode == DECODE_SR || cm->nemo_cfg->decode_mode == DECODE_CACHE) {
+    fprintf(stderr, "%s is not implemented for DECODE_SR, DECODE_CACHE");
+    return -1;
+  }
+
   vpx_clear_system_state();
 
   // Alloc memory for prev_mip in the first frame.

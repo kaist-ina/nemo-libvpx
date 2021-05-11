@@ -11,6 +11,27 @@
 #include "vpx_dsp/skin_detection.h"
 #include "vpx_util/vpx_write_yuv_frame.h"
 
+int vpx_write_y_frame(char *file_path, YV12_BUFFER_CONFIG *s){
+    FILE *y_file = fopen(file_path, "wb");
+    if(y_file == NULL)
+    {
+        fprintf(stderr, "%s: fail to open a file %s", __func__, file_path);
+        return -1;
+    }
+
+    unsigned char *src = s->y_buffer;
+    int h = s->y_crop_height;
+
+    do {
+        fwrite(src, s->y_crop_width, 1, y_file);
+        src += s->y_stride;
+    } while (--h);
+
+    fclose(y_file);
+    return 0;
+}
+
+
 void vpx_write_yuv_frame(FILE *yuv_file, YV12_BUFFER_CONFIG *s) {
 #if defined(OUTPUT_YUV_SRC) || defined(OUTPUT_YUV_DENOISED) || \
     defined(OUTPUT_YUV_SKINMAP)

@@ -10,7 +10,10 @@
 #ifndef VP9_VP9_IFACE_COMMON_H_
 #define VP9_VP9_IFACE_COMMON_H_
 
+#include <vpx_scale/yv12config.h>
 #include "vpx_ports/mem.h"
+#include "vp9/common/vp9_enums.h"
+#include "vpx/vp8.h"
 
 static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG *yv12,
                             void *user_priv) {

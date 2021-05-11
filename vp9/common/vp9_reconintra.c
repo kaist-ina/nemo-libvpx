@@ -269,6 +269,8 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   int i;
   DECLARE_ALIGNED(16, uint8_t, left_col[32]);
   DECLARE_ALIGNED(16, uint8_t, above_data[64 + 16]);
+  //DECLARE_ALIGNED(16, uint8_t, left_col[2048]);
+  //DECLARE_ALIGNED(16, uint8_t, above_data[2048 + 16]);
   uint8_t *above_row = above_data + 16;
   const uint8_t *const_above_row = above_row;
   const int bs = 4 << tx_size;

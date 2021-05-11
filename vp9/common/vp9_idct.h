@@ -48,6 +48,14 @@ void vp9_idct16x16_add(const tran_low_t *input, uint8_t *dest, int stride,
                        int eob);
 void vp9_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
                        int eob);
+void vp9_idct4x4_copy_add(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride,
+                          int eob);
+void vp9_idct8x8_copy_add(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride,
+                     int eob);
+void vp9_idct16x16_copy_add(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride,
+                       int eob);
+void vp9_idct32x32_copy_add(const tran_low_t *input, uint8_t *dest, int stride, int16_t *residual, int res_stride,
+                       int eob);
 
 void vp9_iht4x4_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
                     int stride, int eob);
