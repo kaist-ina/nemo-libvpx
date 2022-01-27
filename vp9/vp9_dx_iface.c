@@ -431,7 +431,6 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
             return VPX_NEMO_ERROR;
         }
     }
-
     ctx->last_show_frame = -1;
     ctx->need_resync = 1;
     ctx->flushed = 0;

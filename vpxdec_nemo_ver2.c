@@ -1128,13 +1128,19 @@ static int main_loop(int argc, const char **argv_)
      };
 
     /* NEMO: Load a DNN */
-    if (nemo_cfg->dnn_mode == ONLINE_DNN && (nemo_cfg->dnn_mode == DECODE_SR || nemo_cfg->dnn_mode == DECODE_CACHE)) {
+    if (nemo_cfg->dnn_mode == ONLINE_DNN && (nemo_cfg->decode_mode == DECODE_SR || nemo_cfg->decode_mode == DECODE_CACHE)) {
         if(vpx_load_nemo_dnn(&decoder, dnn_scale, dnn_path)){
             warn("Failed to load a DNN: %s\n", vpx_codec_error(&decoder));
             goto fail;
         }
     }
-    if (nemo_cfg->dnn_mode == OFFLINE_DNN && (nemo_cfg->dnn_mode == DECODE_SR || nemo_cfg->dnn_mode == DECODE_CACHE)) {
+    if (nemo_cfg->dnn_mode == OFFLINE_DNN && (nemo_cfg->decode_mode == DECODE_SR || nemo_cfg->decode_mode == DECODE_CACHE)) {
+        if(vpx_load_nemo_dnn(&decoder, dnn_scale, NULL)){
+            warn("Failed to load a DNN: %s\n", vpx_codec_error(&decoder));
+            goto fail;
+        }
+    }
+    if (nemo_cfg->dnn_mode == NO_DNN && (nemo_cfg->decode_mode == DECODE_SR || nemo_cfg->decode_mode == DECODE_CACHE)) {
         if(vpx_load_nemo_dnn(&decoder, dnn_scale, NULL)){
             warn("Failed to load a DNN: %s\n", vpx_codec_error(&decoder));
             goto fail;
