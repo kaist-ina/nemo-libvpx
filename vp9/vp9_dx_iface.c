@@ -397,6 +397,11 @@ load_nemo_cache_profile(vpx_codec_alg_priv_t *ctx, int scale, const char *cache_
     ctx->nemo_cfg->cache_profile = init_nemo_cache_profile();
     ctx->nemo_cfg->bilinear_coeff = init_bilinear_coeff(64, 64, scale);
 
+    if (cache_profile_path == NULL) 
+    {
+        return VPX_CODEC_OK;
+    }
+
     if ((ctx->nemo_cfg->cache_profile->file = fopen(cache_profile_path, "rb")) == NULL) {
 #ifdef __ANDROID_API__
         LOGE("Failed to open a file");

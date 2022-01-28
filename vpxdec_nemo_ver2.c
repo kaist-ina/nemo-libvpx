@@ -1154,6 +1154,13 @@ static int main_loop(int argc, const char **argv_)
             goto fail;
         }
     }
+    if (nemo_cfg->cache_mode == KEY_FRAME_CACHE){
+        if(vpx_load_nemo_cache_profile(&decoder, dnn_scale, NULL)){
+            warn("Failed to load a cache profile: %s\n", vpx_codec_error(&decoder));
+            goto fail;
+        }
+    }
+    
     
     /* Decode file */
     while (frame_avail || got_data)
