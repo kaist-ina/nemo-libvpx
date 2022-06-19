@@ -675,10 +675,10 @@ static void save_input_rgbframe(VP9_COMMON *cm) {
     }
 
     if (cm->show_frame) {
-        sprintf(file_path, "%s/%04d.raw", cm->nemo_cfg->input_frame_dir,
+        sprintf(file_path, "%s/%05d.raw", cm->nemo_cfg->input_frame_dir,
                 cm->current_video_frame - 1);
     } else {
-        sprintf(file_path, "%s/%04d_%d.raw", cm->nemo_cfg->input_frame_dir,
+        sprintf(file_path, "%s/%05d_%d.raw", cm->nemo_cfg->input_frame_dir,
                 cm->current_video_frame, cm->current_super_frame);
     }
 
@@ -725,9 +725,9 @@ static void save_input_yuvframe(VP9_COMMON *cm) {
     }
 
     if (cm->show_frame) {
-        sprintf(file_name, "%04d", cm->current_video_frame - 1);
+        sprintf(file_name, "%05d", cm->current_video_frame - 1);
     } else {
-        sprintf(file_name, "%04d_%d", cm->current_video_frame, cm->current_super_frame);
+        sprintf(file_name, "%05d_%d", cm->current_video_frame, cm->current_super_frame);
     }
 
     //up-scale a yuv frame
@@ -768,10 +768,10 @@ static void save_sr_rgbframe(VP9_COMMON *cm) {
     }
 
     if (cm->show_frame) {
-        sprintf(file_path, "%s/%04d.raw", cm->nemo_cfg->sr_frame_dir,
+        sprintf(file_path, "%s/%05d.raw", cm->nemo_cfg->sr_frame_dir,
                 cm->current_video_frame - 1);
     } else {
-        sprintf(file_path, "%s/%04d_%d.raw", cm->nemo_cfg->sr_frame_dir, cm->current_video_frame,
+        sprintf(file_path, "%s/%05d_%d.raw", cm->nemo_cfg->sr_frame_dir, cm->current_video_frame,
                 cm->current_super_frame);
     }
 
@@ -817,9 +817,9 @@ static void save_sr_yuv_frame(VP9_COMMON *cm) {
         height = cm->height;
     }
     if (cm->show_frame) {
-        sprintf(file_name, "%04d", cm->current_video_frame - 1);
+        sprintf(file_name, "%05d", cm->current_video_frame - 1);
     } else {
-        sprintf(file_name, "%04d_%d", cm->current_video_frame, cm->current_super_frame);
+        sprintf(file_name, "%05d_%d", cm->current_video_frame, cm->current_super_frame);
     }
 
     //up-scale a yuv frame
@@ -894,9 +894,9 @@ static void save_input_quality(VP9_COMMON *cm) {
         height = cm->height;
     }
     if (cm->show_frame) {
-        sprintf(file_name, "%04d", cm->current_video_frame - 1);
+        sprintf(file_name, "%05d", cm->current_video_frame - 1);
     } else {
-        sprintf(file_name, "%04d_%d", cm->current_video_frame, cm->current_super_frame);
+        sprintf(file_name, "%05d_%d", cm->current_video_frame, cm->current_super_frame);
     }
 
     //up-scale a yuv frame
@@ -960,9 +960,9 @@ static void save_sr_quality(VP9_COMMON *cm) {
         height = cm->height * cm->scale;
     }
     if (cm->show_frame) {
-        sprintf(file_name, "%04d", cm->current_video_frame - 1);
+        sprintf(file_name, "%05d", cm->current_video_frame - 1);
     } else {
-        sprintf(file_name, "%04d_%d", cm->current_video_frame, cm->current_super_frame);
+        sprintf(file_name, "%05d_%d", cm->current_video_frame, cm->current_super_frame);
     }
 
     //upscale a yuv frame

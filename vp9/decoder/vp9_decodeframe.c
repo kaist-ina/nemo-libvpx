@@ -3175,9 +3175,9 @@ BITSTREAM_PROFILE vp9_read_profile(struct vpx_read_bit_buffer *rb) {
 void upscale_frame_by_offline_dnn(VP9_COMMON *const cm) {
     char file_path[PATH_MAX] = {0};
     if (cm->show_frame)
-        sprintf(file_path, "%s/%04d.raw", cm->nemo_cfg->sr_offline_frame_dir, cm->current_video_frame);
+        sprintf(file_path, "%s/%05d.raw", cm->nemo_cfg->sr_offline_frame_dir, cm->current_video_frame);
     else
-        sprintf(file_path, "%s/%04d_%d.raw", cm->nemo_cfg->sr_offline_frame_dir, cm->current_video_frame, cm->current_super_frame);
+        sprintf(file_path, "%s/%05d_%d.raw", cm->nemo_cfg->sr_offline_frame_dir, cm->current_video_frame, cm->current_super_frame);
     RGB24_realloc_frame_buffer(cm->rgb24_sr_tensor, cm->width * cm->scale, cm->height * cm->scale);
     RGB24_load_frame_buffer(cm->rgb24_sr_tensor, file_path);
     RGB24_to_YV12(get_sr_frame_new_buffer(cm), cm->rgb24_sr_tensor, cm->color_space, cm->color_range);
